@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="pt-br"> 
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Login - BagresStore</title>
+    <link rel="stylesheet" href="/frontend/styles.css">
+    <style>
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: #102923;
+            grid-template-columns: 1fr;
+        }
+        .login-card {
+            width: 100%;
+            max-width: 400px;
+            padding: 32px;
+            background: var(--surface);
+            border-radius: 12px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+        }
+        .login-brand {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+        .login-brand .brand-mark {
+            width: 64px;
+            height: 64px;
+            font-size: 1.5rem;
+        }
+        .login-brand h2 {
+            margin: 0;
+            color: var(--primary);
+            font-weight: 800;
+        }
+        .error-message {
+            min-height: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="login-card">
+        <div class="login-brand">
+            <div class="brand-mark">BS</div>
+            <h2>BagresStore</h2>
+        </div>
+
+        <form id="login-form" class="form-panel">
+            <label>
+                Email
+                <input type="email" id="email" placeholder="seu@email.com" required>
+            </label>
+            
+            <label>
+                Senha
+                <input type="password" id="password" placeholder="••••••••" required>
+            </label>
+
+            <div id="message" class="error-message text-danger text-center"></div>
+
+            <button type="submit" class="primary w-100">Entrar na plataforma</button>
+        </form>
+    </div>
+
+    <script src="/frontend/login.js?v=3"></script>
+</body>
+</html>

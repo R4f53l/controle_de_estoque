@@ -12,7 +12,7 @@ Este é um sistema de gestão de estoque, compras e vendas desenvolvido com **Fa
 
 ## 🛠️ Estrutura do Projeto
 
-- `/core`: Configurações de segurança e segurança.
+- `/core`: Configurações de segurança.
 - `/models`: Definições das tabelas do banco de dados.
 - `/routers`: Rotas da API divididas por contexto (produtos, compras, vendas, auth).
 - `/schema`: Modelos Pydantic para validação de dados.
@@ -23,8 +23,8 @@ Este é um sistema de gestão de estoque, compras e vendas desenvolvido com **Fa
 
 1.  **Clone o repositório:**
     ```bash
-    git clone <url-do-repositorio>
-    cd sasaquelesbagres
+    git clone <https://github.com/R4f53l/controle_de_estoque.git>
+    cd controle_de_estoque
     ```
 
 2.  **Crie e ative um ambiente virtual:**

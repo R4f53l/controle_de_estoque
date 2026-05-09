@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Controle de Estoque</title>
+    <link rel="stylesheet" href="/frontend/styles.css" />
+  </head>
+  <body>
+    <aside class="sidebar" aria-label="Navegacao principal">
+      <div class="brand">
+        <span class="brand-mark">CE</span>
+        <div>
+          <strong>Estoque</strong>
+          <span>BagresSports</span>
+        </div>
+      </div>
+
+      <nav class="nav">
+        <button class="nav-button active" data-section="overview" type="button">Visao geral</button>
+        <button class="nav-button" data-section="products" type="button">Produtos</button>
+        <button class="nav-button" data-section="purchases" type="button">Compras</button>
+        <button class="nav-button" data-section="sales" type="button">Vendas</button>
+      </nav>
+
+      <div class="connection">
+        <span id="connection-dot" class="dot"></span>
+        <span id="connection-text">Conectando...</span>
+      </div>
+    </aside>
+
+    <main class="app-shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Sistema de controle</p>
+          <h1 id="page-title">Visao geral</h1>
+        </div>
+        <button id="refresh-button" class="icon-button" type="button" title="Atualizar dados" aria-label="Atualizar dados">
+          <span aria-hidden="true">&#8635;</span>
+        </button>
+      </header>
+
+      <section id="alerts" class="alerts" aria-live="polite"></section>
+
+      <section id="overview" class="page-section active">
+        <div class="metrics-grid">
+          <article class="metric">
+            <span>Produtos cadastrados</span>
+            <strong id="metric-products">0</strong>
+          </article>
+          <article class="metric">
+            <span>Unidades em estoque</span>
+            <strong id="metric-stock">0</strong>
+          </article>
+          <article class="metric">
+            <span>Total em compras</span>
+            <strong id="metric-purchases">R$ 0,00</strong>
+          </article>
+          <article class="metric">
+            <span>Total em vendas</span>
+            <strong id="metric-sales">R$ 0,00</strong>
+          </article>
+        </div>
+
+        <div class="content-grid">
+          <section class="panel wide">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">Estoque atual</p>
+                <h2>Produtos</h2>
+              </div>
+              <input id="stock-search" class="search" type="search" placeholder="Buscar produto" />
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Produto</th>
+                    <th>Entradas</th>
+                    <th>Saidas</th>
+                    <th>Saldo</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="stock-table"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">Movimento</p>
+                <h2>Resumo rapido</h2>
+              </div>
+            </div>
+            <div id="movement-summary" class="movement-list"></div>
+          </section>
+        </div>
+      </section>
+
+      <section id="products" class="page-section">
+        <div class="content-grid">
+          <form id="product-form" class="panel form-panel">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">Cadastro</p>
+                <h2 id="product-form-title">Novo produto</h2>
+              </div>
+            </div>
+            <input type="hidden" id="product-id" />
+            <label>
+              Nome
+              <input id="product-name" name="nome" required maxlength="120" />
+            </label>
+            <label>
+              Descricao
+              <textarea id="product-description" name="descricao" rows="4"></textarea>
+            </label>
+            <div class="form-actions">
+              <button class="primary" type="submit">Salvar produto</button>
+              <button id="cancel-product-edit" class="secondary hidden" type="button">Cancelar</button>
+            </div>
+          </form>
+
+          <section class="panel wide">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">Catalogo</p>
+                <h2>Produtos cadastrados</h2>
+              </div>
+              <input id="product-search" class="search" type="search" placeholder="Buscar produto" />
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Nome</th>
+                    <th>Descricao</th>
+                    <th>Estoque</th>
+                    <th>Acoes</th>
+                  </tr>
+                </thead>
+                <tbody id="products-table"></tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section id="purchases" class="page-section">
+        <div class="content-grid">
+          <form id="purchase-form" class="panel form-panel">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">Entrada</p>
+                <h2 id="purchase-form-title">Nova compra</h2>
+              </div>
+            </div>
+            <input type="hidden" id="purchase-id" />
+            <label>
+              Data da compra
+              <input id="purchase-date" type="date" required />
+            </label>
+            <label>
+              Data de recebimento
+              <input id="purchase-received-date" type="date" />
+              </label>
+              <label>
+                Destino da Compra
+                <select id="purchase-for-stock">
+                  <option value="true" selected>Estoque Físico</option>
+                  <option value="false">Envio Direto ao Cliente</option>
+                </select>
+              </label>
+            <div id="purchase-item-builder" class="item-builder">
+              <div class="form-row">
+                <label>
+                  Produto
+                  <select id="purchase-item-product"></select>
+                </label>
+                <label>
+                  Quantidade
+                  <input id="purchase-item-quantity" type="number" min="1" step="1" />
+                </label>
+              </div>
+              <div class="form-row">
+                <label>
+                  Valor unitario
+                  <input id="purchase-item-price" type="number" min="0" step="0.01" placeholder="0,00" />
+                </label>
+                <button id="add-purchase-item" class="secondary align-end" type="button">Adicionar item</button>
+              </div>
+            </div>
+            <div id="purchase-draft-list" class="draft-list">
+              <div class="draft-list-heading">
+                <strong>Itens da compra</strong>
+                <span id="purchase-draft-total">R$ 0,00</span>
+              </div>
+              <div class="table-wrap compact">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Produto</th>
+                      <th>Qtd</th>
+                      <th>Unitario</th>
+                      <th>Total</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody id="purchase-draft-table"></tbody>
+                </table>
+              </div>
+            </div>
+            <div class="form-actions">
+              <button class="primary" type="submit">Salvar compra</button>
+              <button id="cancel-purchase-edit" class="secondary hidden" type="button">Cancelar</button>
+            </div>
+          </form>
+
+          <section class="panel wide">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">Historico</p>
+                <h2>Compras</h2>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Compra</th>
+                    <th>Recebimento</th>
+                    <th>Valor</th>
+                    <th>Para Estoque</th>
+                    <th>Itens</th>
+                    <th>Acoes</th>
+                  </tr>
+                </thead>
+                <tbody id="purchases-table"></tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section id="sales" class="page-section">
+        <div class="content-grid">
+          <form id="sale-form" class="panel form-panel">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">Saida</p>
+                <h2 id="sale-form-title">Nova venda</h2>
+              </div>
+            </div>
+            <input type="hidden" id="sale-id" />
+            <label>
+              Data da venda
+              <input id="sale-date" type="date" required />
+              </label>
+              <label>
+                Tipo de Saída
+                <select id="sale-direct">
+                  <option value="false" selected>Sair do Estoque</option>
+                  <option value="true">Venda Direta / Dropshipping</option>
+                </select>
+              </label>
+            <div id="sale-item-builder" class="item-builder">
+              <div class="form-row">
+                <label>
+                  Produto
+                  <select id="sale-item-product"></select>
+                </label>
+                <label>
+                  Quantidade
+                  <input id="sale-item-quantity" type="number" min="1" step="1" />
+                </label>
+              </div>
+              <div class="form-row">
+                <label>
+                  Valor unitario
+                  <input id="sale-item-price" type="number" min="0" step="0.01" placeholder="0,00" />
+                </label>
+                <button id="add-sale-item" class="secondary align-end" type="button">Adicionar item</button>
+              </div>
+            </div>
+            <div id="sale-draft-list" class="draft-list">
+              <div class="draft-list-heading">
+                <strong>Itens da venda</strong>
+                <span id="sale-draft-total">R$ 0,00</span>
+              </div>
+              <div class="table-wrap compact">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Produto</th>
+                      <th>Qtd</th>
+                      <th>Unitario</th>
+                      <th>Total</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody id="sale-draft-table"></tbody>
+                </table>
+              </div>
+            </div>
+            <div class="form-actions">
+              <button class="primary" type="submit">Salvar venda</button>
+              <button id="cancel-sale-edit" class="secondary hidden" type="button">Cancelar</button>
+            </div>
+          </form>
+
+          <section class="panel wide">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">Historico</p>
+                <h2>Vendas</h2>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Data</th>
+                    <th>Valor</th>
+                    <th>Dropshipping</th>
+                    <th>Itens</th>
+                    <th>Acoes</th>
+                  </tr>
+                </thead>
+                <tbody id="sales-table"></tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+      </section>
+    </main>
+
+    <script src="/frontend/dashboard.js?v=5" defer></script>
+  </body>
+</html>
