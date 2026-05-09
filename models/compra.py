@@ -10,6 +10,7 @@ class Compra(Base):
     dataderecebimento = Column(Date, nullable=True) 
     valor = Column(Float, nullable=True)
     para_estoque = Column(Boolean, default=True)  
+    valor_imposto = Column(Float, nullable=True)
 
     produtos = relationship("CompraProduto", back_populates="compra", cascade="all, delete-orphan")
     

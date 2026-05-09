@@ -77,6 +77,7 @@ const els = {
   get purchaseDate() { return document.querySelector("#purchase-date"); },
   get purchaseReceivedDate() { return document.querySelector("#purchase-received-date"); },
   get purchaseForStock() { return document.querySelector("#purchase-for-stock"); },
+  get purchaseTax() { return document.querySelector("#purchase-tax"); },
   get purchaseFormTitle() { return document.querySelector("#purchase-form-title"); },
   get cancelPurchaseEdit() { return document.querySelector("#cancel-purchase-edit"); },
   get purchaseItemBuilder() { return document.querySelector("#purchase-item-builder"); },
@@ -284,11 +285,13 @@ function badgeForStock(balance) {
 function renderMetrics(rows) {
   const totalStock = rows.reduce((sum, item) => sum + item.balance, 0);
   const totalPurchases = state.purchases.reduce((sum, item) => sum + purchaseTotalFromItems(item), 0);
+  const tax = state.purchases.reduce((sum, purchase) => sum + (purchase.valor_imposto || 0),0);
   const totalSales = state.sales.reduce((sum, item) => sum + saleTotalFromItems(item), 0);
-
+ 
+  const result = tax + totalPurchases
   els.metricProducts.textContent = state.products.length;
   els.metricStock.textContent = totalStock;
-  els.metricPurchases.textContent = money.format(totalPurchases);
+  els.metricPurchases.textContent = money.format(result);
   els.metricSales.textContent = money.format(totalSales);
 
   els.movementSummary.innerHTML = [
@@ -356,6 +359,7 @@ function renderPurchasesTable() {
           <td>${formatDate(purchase.datadecompra)}</td>
           <td>${formatDate(purchase.dataderecebimento)}</td>
           <td>${money.format(total)}</td>
+          <td>${money.format(purchase.valor_imposto || 0)}</td>
           <td>${purchase.para_estoque ? "Sim" : "Não"}</td>
           <td>${describeItems(items, "produto_id")}</td>
           <td>
@@ -367,7 +371,7 @@ function renderPurchasesTable() {
         </tr>
       `;
     }).join("")
-    : '<tr><td class="empty" colspan="6">Nenhuma compra registrada.</td></tr>';
+    : '<tr><td class="empty" colspan="8">Nenhuma compra registrada.</td></tr>';
 }
 
 function renderSalesTable() {
@@ -533,6 +537,7 @@ async function savePurchase(event) {
       datadecompra: els.purchaseDate.value,
       dataderecebimento: els.purchaseReceivedDate.value || null,
       para_estoque: els.purchaseForStock.value === "true",
+      valor_imposto: valueOrNull(els.purchaseTax.value),
       valor: existingPurchase ? purchaseTotalFromItems(existingPurchase) : 0,
     };
 
@@ -549,6 +554,7 @@ async function savePurchase(event) {
       datadecompra: els.purchaseDate.value,
       dataderecebimento: els.purchaseReceivedDate.value || null,
       para_estoque: els.purchaseForStock.value === "true",
+      valor_imposto: valueOrNull(els.purchaseTax.value),
       itens: state.purchaseDraftItems,
     };
 
@@ -570,6 +576,7 @@ function editPurchase(id) {
   els.purchaseDate.value = purchase.datadecompra || "";
   els.purchaseReceivedDate.value = purchase.dataderecebimento || "";
   els.purchaseForStock.value = purchase.para_estoque !== false ? "true" : "false";
+  els.purchaseTax.value = purchase.valor_imposto || "";
   state.purchaseDraftItems = [];
   renderPurchaseDraft();
   els.purchaseItemBuilder.classList.add("hidden");
@@ -582,6 +589,7 @@ function editPurchase(id) {
 function resetPurchaseForm() {
   els.purchaseForm.reset();
   els.purchaseForStock.value = "true";
+  els.purchaseTax.value = "";
   els.purchaseId.value = "";
   state.purchaseDraftItems = [];
   renderPurchaseDraft();
@@ -784,4 +792,7 @@ function withErrorHandling(handler) {
 
 bindEvents();
 setTodayDefaults();
+loadData();
+
+;
 loadData();

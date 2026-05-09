@@ -13,7 +13,8 @@ def adicionar_compra(compra: Compra_Schema, db: Session = Depends(get_db)):
         datadecompra=compra.datadecompra,
         dataderecebimento=compra.dataderecebimento,
         valor=compra.valor,
-        para_estoque=compra.para_estoque
+        para_estoque=compra.para_estoque,
+        valor_imposto = compra.valor_imposto
     )
     db.add(nova_compra)
     db.commit()
@@ -37,7 +38,8 @@ def adicionar_compra_com_itens(compra: CompraComItens_Schema, db: Session = Depe
         datadecompra=compra.datadecompra,
         dataderecebimento=compra.dataderecebimento,
         valor=valor_total,
-        para_estoque=compra.para_estoque
+        para_estoque=compra.para_estoque,
+        valor_imposto = compra.valor_imposto
     )
     db.add(nova_compra)
     db.flush()
@@ -76,6 +78,7 @@ def atualizar_compra(compra_id: int, compra: Compra_Schema, db: Session = Depend
     compra_existente.dataderecebimento = compra.dataderecebimento
     compra_existente.valor = compra.valor
     compra_existente.para_estoque = compra.para_estoque
+    compra_existente.valor_imposto = compra.valor_imposto
     db.commit()
     db.refresh(compra_existente)
     return {"message": "Compra atualizada com sucesso", "compra_id": compra_existente.id}

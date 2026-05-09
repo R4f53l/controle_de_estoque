@@ -6,6 +6,7 @@ class Compra_Schema(BaseModel):
     dataderecebimento: date | None = None
     valor: float | None = None
     para_estoque: bool = True
+    valor_imposto: float | None = None
     class Config:
         from_attributes = True
 
@@ -22,6 +23,7 @@ class CompraItemEntrada_Schema(BaseModel):
 class CompraComItens_Schema(BaseModel):
     datadecompra: date
     dataderecebimento: date | None = None
+    valor_imposto: float | None = None
     para_estoque: bool = True
     itens: list[CompraItemEntrada_Schema]
 
