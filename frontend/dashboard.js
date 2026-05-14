@@ -1,4 +1,4 @@
-console.log("BagresStore Dashboard v2.0 - Stock Logic Loaded");
+
 const API_BASE = window.location.origin.startsWith("http")
   ? window.location.origin
   : "http://localhost:8000";
