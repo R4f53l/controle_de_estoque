@@ -10,7 +10,7 @@ router = APIRouter(prefix="/produtos", tags=["produtos"], dependencies=[Depends(
 
 @router.post("/adicionar_produto")
 def adicionar_produto(produto: Produto_Schema, db: Session = Depends(get_db)):
-    produto_existente = db.query(Produto).filter(Produto.nome == produto.nome).first()
+    produto_existente = db.query(Produto).filter(Produto.nome == produto.nome, Produto.tamanho == produto.tamanho).first()
     if produto_existente:
         raise HTTPException(status_code=400, detail="Produto já existe")
     novo_produto = Produto(
