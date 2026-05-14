@@ -10,14 +10,12 @@ router = APIRouter(prefix="/produtos", tags=["produtos"], dependencies=[Depends(
 
 @router.post("/adicionar_produto")
 def adicionar_produto(produto: Produto_Schema, db: Session = Depends(get_db)):
-    produto_existente = db.query(Produto).filter(Produto.nome == produto.nome, Produto.tamanho == produto.tamanho).first()
+    produto_existente = db.query(Produto).filter(Produto.nome == produto.nome).first()
     if produto_existente:
         raise HTTPException(status_code=400, detail="Produto já existe")
     novo_produto = Produto(
         nome=produto.nome,
-        descricao=produto.descricao,
-        tamanho=produto.tamanho,
-        genero=produto.genero
+        descricao=produto.descricao
     )
     db.add(novo_produto)
     db.commit()
@@ -40,8 +38,6 @@ def atualizar_produto(produto_id: int, produto: Produto_Schema, db: Session = De
         raise HTTPException(status_code=404, detail="Produto não encontrado")
     produto_existente.nome = produto.nome
     produto_existente.descricao = produto.descricao
-    produto_existente.tamanho = produto.tamanho
-    produto_existente.genero = produto.genero
     db.commit()
     db.refresh(produto_existente)
     return {"message": "Produto atualizado com sucesso", "produto_id": produto_existente.id}

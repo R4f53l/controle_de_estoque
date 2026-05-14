@@ -76,6 +76,8 @@
                 <thead>
                   <tr>
                     <th>Produto</th>
+                    <th>Tamanho</th>
+                    <th>Genero</th>
                     <th>Entradas</th>
                     <th>Saidas</th>
                     <th>Saldo</th>
@@ -117,27 +119,6 @@
               Descricao
               <textarea id="product-description" name="descricao" rows="4"></textarea>
             </label>
-            <label>
-              Tamanho
-              <select id="product-size" name="tamanho">
-                <option value="">Selecione</option>
-                <option value="PP">PP</option>
-                <option value="P">P</option>
-                <option value="M">M</option>
-                <option value="G">G</option>
-                <option value="GG">GG</option>
-                <option value="XG">XG</option>
-              </select>
-            </label>
-            <label>
-              Genero
-              <select id="product-gender" name="genero">
-                <option value="">Selecione</option>
-                <option value="Masculino">Masculino</option>
-                <option value="Feminino">Feminino</option>
-                <option value="Unissex">Unissex</option>
-              </select>
-            </label>
             <div class="form-actions">
               <button class="primary" type="submit">Salvar produto</button>
               <button id="cancel-product-edit" class="secondary hidden" type="button">Cancelar</button>
@@ -157,8 +138,7 @@
                 <thead>
                   <tr>
                     <th>Nome</th>
-                    <th>Tamanho</th>
-                    <th>Genero</th>
+                    <th>Descricao</th>
                     <th>Estoque</th>
                     <th>Acoes</th>
                   </tr>
@@ -217,6 +197,29 @@
                 </label>
                 <button id="add-purchase-item" class="secondary align-end" type="button">Adicionar item</button>
               </div>
+              <div class="form-row">
+                <label>
+                  Tamanho
+                  <select id="purchase-item-size">
+                    <option value="">Selecione</option>
+                    <option value="PP">PP</option>
+                    <option value="P">P</option>
+                    <option value="M">M</option>
+                    <option value="G">G</option>
+                    <option value="GG">GG</option>
+                    <option value="XG">XG</option>
+                  </select>
+                </label>
+                <label>
+                  Genero
+                  <select id="purchase-item-gender">
+                    <option value="">Selecione</option>
+                    <option value="Masculino">Masculino</option>
+                    <option value="Feminino">Feminino</option>
+                    <option value="Unissex">Unissex</option>
+                  </select>
+                </label>
+              </div>
             </div>
             <div id="purchase-draft-list" class="draft-list">
               <div class="draft-list-heading">
@@ -228,6 +231,8 @@
                   <thead>
                     <tr>
                       <th>Produto</th>
+                      <th>Tamanho</th>
+                      <th>Genero</th>
                       <th>Qtd</th>
                       <th>Unitario</th>
                       <th>Total</th>
@@ -311,6 +316,29 @@
                 </label>
                 <button id="add-sale-item" class="secondary align-end" type="button">Adicionar item</button>
               </div>
+              <div class="form-row">
+                <label>
+                  Tamanho
+                  <select id="sale-item-size">
+                    <option value="">Selecione</option>
+                    <option value="PP">PP</option>
+                    <option value="P">P</option>
+                    <option value="M">M</option>
+                    <option value="G">G</option>
+                    <option value="GG">GG</option>
+                    <option value="XG">XG</option>
+                  </select>
+                </label>
+                <label>
+                  Genero
+                  <select id="sale-item-gender">
+                    <option value="">Selecione</option>
+                    <option value="Masculino">Masculino</option>
+                    <option value="Feminino">Feminino</option>
+                    <option value="Unissex">Unissex</option>
+                  </select>
+                </label>
+              </div>
             </div>
             <div id="sale-draft-list" class="draft-list">
               <div class="draft-list-heading">
@@ -322,6 +350,8 @@
                   <thead>
                     <tr>
                       <th>Produto</th>
+                      <th>Tamanho</th>
+                      <th>Genero</th>
                       <th>Qtd</th>
                       <th>Unitario</th>
                       <th>Total</th>

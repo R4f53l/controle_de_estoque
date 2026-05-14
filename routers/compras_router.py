@@ -49,7 +49,9 @@ def adicionar_compra_com_itens(compra: CompraComItens_Schema, db: Session = Depe
             compra_id=nova_compra.id,
             produto_id=item.produto_id,
             quantidade=item.quantidade,
-            valor_unitario=item.valor_unitario
+            valor_unitario=item.valor_unitario,
+            tamanho=item.tamanho,
+            genero=item.genero
         )
         for item in compra.itens
     ]

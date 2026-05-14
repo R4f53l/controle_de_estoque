@@ -70,8 +70,6 @@ const els = {
   get productId() { return document.querySelector("#product-id"); },
   get productName() { return document.querySelector("#product-name"); },
   get productDescription() { return document.querySelector("#product-description"); },
-  get productSize() { return document.querySelector("#product-size"); },
-  get productGender() { return document.querySelector("#product-gender"); },
   get productFormTitle() { return document.querySelector("#product-form-title"); },
   get cancelProductEdit() { return document.querySelector("#cancel-product-edit"); },
   get purchaseForm() { return document.querySelector("#purchase-form"); },
@@ -87,6 +85,8 @@ const els = {
   get purchaseItemProduct() { return document.querySelector("#purchase-item-product"); },
   get purchaseItemQuantity() { return document.querySelector("#purchase-item-quantity"); },
   get purchaseItemPrice() { return document.querySelector("#purchase-item-price"); },
+  get purchaseItemSize() { return document.querySelector("#purchase-item-size"); },
+  get purchaseItemGender() { return document.querySelector("#purchase-item-gender"); },
   get purchaseDraftList() { return document.querySelector("#purchase-draft-list"); },
   get purchaseDraftTable() { return document.querySelector("#purchase-draft-table"); },
   get purchaseDraftTotal() { return document.querySelector("#purchase-draft-total"); },
@@ -101,6 +101,8 @@ const els = {
   get saleItemProduct() { return document.querySelector("#sale-item-product"); },
   get saleItemQuantity() { return document.querySelector("#sale-item-quantity"); },
   get saleItemPrice() { return document.querySelector("#sale-item-price"); },
+  get saleItemSize() { return document.querySelector("#sale-item-size"); },
+  get saleItemGender() { return document.querySelector("#sale-item-gender"); },
   get saleDraftList() { return document.querySelector("#sale-draft-list"); },
   get saleDraftTable() { return document.querySelector("#sale-draft-table"); },
   get saleDraftTotal() { return document.querySelector("#sale-draft-total"); },
@@ -149,6 +151,14 @@ function saleTotalFromItems(sale) {
   return items.reduce((sum, item) => {
     return sum + Number(item.quantidade || 0) * Number(item.valor_unitario || 0);
   }, 0);
+}
+
+function variationKey(produtoId, tamanho, genero) {
+  return [Number(produtoId), tamanho || "", genero || ""].join("|");
+}
+
+function variationLabel(item) {
+  return `${item.tamanho || "-"} / ${item.genero || "-"}`;
 }
 
 function setConnection(online, text) {
@@ -252,21 +262,60 @@ async function loadData() {
 }
 
 function stockRows() {
+  const rows = new Map();
+
+  function ensureRow(produtoId, tamanho, genero) {
+    const product = byId(state.products, produtoId);
+    const key = variationKey(produtoId, tamanho, genero);
+
+    if (!rows.has(key)) {
+      rows.set(key, {
+        id: produtoId,
+        nome: product ? product.nome : `Produto #${produtoId}`,
+        descricao: product ? product.descricao : "",
+        tamanho: tamanho || "",
+        genero: genero || "",
+        purchased: 0,
+        sold: 0,
+        balance: 0,
+      });
+    }
+
+    return rows.get(key);
+  }
+
+  state.purchaseItems.forEach((item) => {
+    const purchase = byId(state.purchases, item.compra_id);
+    if (!purchase || purchase.para_estoque === false || !purchase.dataderecebimento) return;
+
+    const row = ensureRow(item.produto_id, item.tamanho, item.genero);
+    row.purchased += Number(item.quantidade || 0);
+  });
+
+  state.saleItems.forEach((item) => {
+    const sale = byId(state.sales, item.venda_id);
+    if (!sale || sale.venda_direta === true) return;
+
+    const row = ensureRow(item.produto_id, item.tamanho, item.genero);
+    row.sold += Number(item.quantidade || 0);
+  });
+
+  state.products.forEach((product) => {
+    const hasMovement = Array.from(rows.values()).some((row) => Number(row.id) === Number(product.id));
+    if (!hasMovement) ensureRow(product.id, "", "");
+  });
+
+  return Array.from(rows.values()).map((row) => ({
+    ...row,
+    balance: row.purchased - row.sold,
+  }));
+}
+
+function productRows(stock) {
   return state.products.map((product) => {
-    const purchased = state.purchaseItems
-      .filter((item) => {
-        if (Number(item.produto_id) !== Number(product.id)) return false;
-        const purchase = byId(state.purchases, item.compra_id);
-        return purchase && purchase.para_estoque && purchase.dataderecebimento !== null && purchase.dataderecebimento !== "";
-      })
-      .reduce((sum, item) => sum + Number(item.quantidade || 0), 0);
-    const sold = state.saleItems
-      .filter((item) => {
-        if (Number(item.produto_id) !== Number(product.id)) return false;
-        const sale = byId(state.sales, item.venda_id);
-        return sale && sale.venda_direta === false; 
-      })
-      .reduce((sum, item) => sum + Number(item.quantidade || 0), 0);
+    const productStock = stock.filter((row) => Number(row.id) === Number(product.id));
+    const purchased = productStock.reduce((sum, row) => sum + row.purchased, 0);
+    const sold = productStock.reduce((sum, row) => sum + row.sold, 0);
 
     return {
       ...product,
@@ -275,6 +324,14 @@ function stockRows() {
       balance: purchased - sold,
     };
   });
+}
+
+function availableForVariation(produtoId, tamanho, genero) {
+  return stockRows().find((row) => (
+    Number(row.id) === Number(produtoId)
+    && (row.tamanho || "") === (tamanho || "")
+    && (row.genero || "") === (genero || "")
+  ))?.balance || 0;
 }
 
 function badgeForStock(balance) {
@@ -313,19 +370,27 @@ function renderMetrics(rows) {
 
 function renderStockTable(rows) {
   const query = els.stockSearch.value.trim().toLowerCase();
-  const filtered = rows.filter((row) => row.nome.toLowerCase().includes(query));
+  const filtered = rows.filter((row) => {
+    const searchable = [row.nome, row.descricao, row.tamanho, row.genero]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
+    return searchable.includes(query);
+  });
 
   els.stockTable.innerHTML = filtered.length
     ? filtered.map((row) => `
       <tr>
         <td><strong>${row.nome}</strong><br><span class="muted">${row.descricao || "-"}</span></td>
+        <td>${row.tamanho || "-"}</td>
+        <td>${row.genero || "-"}</td>
         <td>${row.purchased}</td>
         <td>${row.sold}</td>
         <td><strong>${row.balance}</strong></td>
         <td>${badgeForStock(row.balance)}</td>
       </tr>
     `).join("")
-    : '<tr><td class="empty" colspan="5">Nenhum produto encontrado.</td></tr>';
+    : '<tr><td class="empty" colspan="7">Nenhum produto encontrado.</td></tr>';
 }
 
 function renderProductsTable(rows) {
@@ -334,8 +399,6 @@ function renderProductsTable(rows) {
     const searchable = [
       row.nome,
       row.descricao,
-      row.tamanho,
-      row.genero,
     ].filter(Boolean).join(" ").toLowerCase();
     return searchable.includes(query);
   });
@@ -344,8 +407,7 @@ function renderProductsTable(rows) {
     ? filtered.map((row) => `
       <tr>
         <td><strong>${row.nome}</strong><br><span class="muted">#${row.id}</span></td>
-        <td>${row.tamanho || "-"}</td>
-        <td>${row.genero || "-"}</td>
+        <td>${row.descricao || "-"}</td>
         <td>${row.balance}</td>
         <td>
           <div class="actions">
@@ -355,7 +417,7 @@ function renderProductsTable(rows) {
         </td>
       </tr>
     `).join("")
-    : '<tr><td class="empty" colspan="5">Cadastre o primeiro produto.</td></tr>';
+    : '<tr><td class="empty" colspan="4">Cadastre o primeiro produto.</td></tr>';
 }
 
 function renderPurchasesTable() {
@@ -415,7 +477,7 @@ function describeItems(items) {
       const product = byId(state.products, item.produto_id);
       const productName = product ? product.nome : `Produto #${item.produto_id}`;
       const total = Number(item.quantidade || 0) * Number(item.valor_unitario || 0);
-      return `${item.quantidade}x ${productName} (${money.format(total)})`;
+      return `${item.quantidade}x ${productName} - ${variationLabel(item)} (${money.format(total)})`;
     })
     .join("<br>");
 }
@@ -437,7 +499,7 @@ function render() {
   const rows = stockRows();
   renderMetrics(rows);
   renderStockTable(rows);
-  renderProductsTable(rows);
+  renderProductsTable(productRows(rows));
   renderPurchasesTable();
   renderSalesTable();
   renderSelects();
@@ -455,6 +517,8 @@ function renderPurchaseDraft() {
       return `
         <tr>
           <td>${productName}</td>
+          <td>${item.tamanho || "-"}</td>
+          <td>${item.genero || "-"}</td>
           <td>${item.quantidade}</td>
           <td>${money.format(item.valor_unitario || 0)}</td>
           <td>${money.format(total)}</td>
@@ -464,7 +528,7 @@ function renderPurchaseDraft() {
         </tr>
       `;
     }).join("")
-    : '<tr><td class="empty" colspan="5">Adicione os produtos desta compra.</td></tr>';
+    : '<tr><td class="empty" colspan="7">Adicione os produtos desta compra.</td></tr>';
 }
 
 function renderSaleDraft() {
@@ -477,6 +541,8 @@ function renderSaleDraft() {
       return `
         <tr>
           <td>${productName}</td>
+          <td>${item.tamanho || "-"}</td>
+          <td>${item.genero || "-"}</td>
           <td>${item.quantidade}</td>
           <td>${money.format(item.valor_unitario || 0)}</td>
           <td>${money.format(total)}</td>
@@ -486,7 +552,7 @@ function renderSaleDraft() {
         </tr>
       `;
     }).join("")
-    : '<tr><td class="empty" colspan="5">Adicione os produtos desta venda.</td></tr>';
+    : '<tr><td class="empty" colspan="7">Adicione os produtos desta venda.</td></tr>';
 }
 
 function switchSection(section) {
@@ -508,8 +574,6 @@ async function saveProduct(event) {
   const payload = {
     nome: els.productName.value.trim(),
     descricao: els.productDescription.value.trim() || null,
-    tamanho: els.productSize.value || null,
-    genero: els.productGender.value || null,
   };
 
   await request(id ? endpoints.productUpdate(id) : endpoints.productCreate, {
@@ -527,8 +591,6 @@ function editProduct(id) {
   els.productId.value = product.id;
   els.productName.value = product.nome;
   els.productDescription.value = product.descricao || "";
-  els.productSize.value = product.tamanho || "";
-  els.productGender.value = product.genero || "";
   els.productFormTitle.textContent = "Editar produto";
   els.cancelProductEdit.classList.remove("hidden");
   switchSection("products");
@@ -619,6 +681,8 @@ function addPurchaseDraftItem() {
     produto_id: Number(els.purchaseItemProduct.value),
     quantidade: Number(els.purchaseItemQuantity.value),
     valor_unitario: valueOrNull(els.purchaseItemPrice.value) || 0,
+    tamanho: els.purchaseItemSize.value || null,
+    genero: els.purchaseItemGender.value || null,
   };
 
   if (!payload.produto_id) {
@@ -627,10 +691,15 @@ function addPurchaseDraftItem() {
   if (!payload.quantidade || payload.quantidade < 1) {
     throw new Error("Informe uma quantidade valida.");
   }
+  if (!payload.tamanho || !payload.genero) {
+    throw new Error("Informe tamanho e genero do item.");
+  }
 
   state.purchaseDraftItems.push(payload);
   els.purchaseItemQuantity.value = "";
   els.purchaseItemPrice.value = "";
+  els.purchaseItemSize.value = "";
+  els.purchaseItemGender.value = "";
   renderPurchaseDraft();
 }
 
@@ -705,6 +774,8 @@ function addSaleDraftItem() {
     produto_id: Number(els.saleItemProduct.value),
     quantidade: Number(els.saleItemQuantity.value),
     valor_unitario: valueOrNull(els.saleItemPrice.value) || 0,
+    tamanho: els.saleItemSize.value || null,
+    genero: els.saleItemGender.value || null,
   };
 
   if (!payload.produto_id) {
@@ -713,10 +784,25 @@ function addSaleDraftItem() {
   if (!payload.quantidade || payload.quantidade < 1) {
     throw new Error("Informe uma quantidade valida.");
   }
+  if (!payload.tamanho || !payload.genero) {
+    throw new Error("Informe tamanho e genero do item.");
+  }
+  if (els.saleDirect.value !== "true") {
+    const draftQuantity = state.saleDraftItems
+      .filter((item) => variationKey(item.produto_id, item.tamanho, item.genero) === variationKey(payload.produto_id, payload.tamanho, payload.genero))
+      .reduce((sum, item) => sum + Number(item.quantidade || 0), 0);
+    const available = availableForVariation(payload.produto_id, payload.tamanho, payload.genero);
+
+    if (available - draftQuantity < payload.quantidade) {
+      throw new Error(`Estoque insuficiente para essa variacao. Disponivel: ${available - draftQuantity}.`);
+    }
+  }
 
   state.saleDraftItems.push(payload);
   els.saleItemQuantity.value = "";
   els.saleItemPrice.value = "";
+  els.saleItemSize.value = "";
+  els.saleItemGender.value = "";
   renderSaleDraft();
 }
 
@@ -782,7 +868,7 @@ function bindEvents() {
 
   els.refreshButton.addEventListener("click", loadData);
   els.stockSearch.addEventListener("input", () => renderStockTable(stockRows()));
-  els.productSearch.addEventListener("input", () => renderProductsTable(stockRows()));
+  els.productSearch.addEventListener("input", () => renderProductsTable(productRows(stockRows())));
   els.productForm.addEventListener("submit", withErrorHandling(saveProduct));
   els.cancelProductEdit.addEventListener("click", resetProductForm);
   els.purchaseForm.addEventListener("submit", withErrorHandling(savePurchase));

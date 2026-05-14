@@ -259,6 +259,10 @@ button {
   grid-column: span 1;
 }
 
+#overview .panel.wide table {
+  min-width: 820px;
+}
+
 #products .content-grid {
   grid-template-columns: minmax(260px, 320px) minmax(0, 1fr);
 }
@@ -460,7 +464,7 @@ textarea {
 }
 
 .table-wrap.compact table {
-  min-width: 440px;
+  min-width: 640px;
 }
 
 .table-wrap.compact th,

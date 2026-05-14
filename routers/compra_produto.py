@@ -14,7 +14,9 @@ def adicionar_compra_produto(compra_produto: CompraProduto_Schema, db: Session =
         compra_id=compra_produto.compra_id,
         produto_id=compra_produto.produto_id,
         quantidade=compra_produto.quantidade,
-        valor_unitario=compra_produto.valor_unitario
+        valor_unitario=compra_produto.valor_unitario,
+        tamanho=compra_produto.tamanho,
+        genero=compra_produto.genero
     )
     db.add(nova_compra_produto)
     db.commit()
@@ -47,6 +49,8 @@ def atualizar_compra_produto(compra_produto_id: int, compra_produto: CompraProdu
     compra_produto_db.produto_id = compra_produto.produto_id
     compra_produto_db.quantidade = compra_produto.quantidade
     compra_produto_db.valor_unitario = compra_produto.valor_unitario
+    compra_produto_db.tamanho = compra_produto.tamanho
+    compra_produto_db.genero = compra_produto.genero
     
     db.commit()
     db.refresh(compra_produto_db)

@@ -16,7 +16,9 @@ def adicionar_venda_item(venda_item: VendaItem_Schema, db: Session = Depends(get
         venda_id=venda_item.venda_id,
         produto_id=venda_item.produto_id,
         quantidade=venda_item.quantidade,
-        valor_unitario=venda_item.valor_unitario
+        valor_unitario=venda_item.valor_unitario,
+        tamanho=venda_item.tamanho,
+        genero=venda_item.genero
     )
     db.add(nova_venda_item)
     db.commit()
@@ -39,6 +41,8 @@ def atualizar_venda_item(venda_item_id: int, venda_item: VendaItem_Schema, db: S
     venda_item_db.produto_id = venda_item.produto_id
     venda_item_db.quantidade = venda_item.quantidade
     venda_item_db.valor_unitario = venda_item.valor_unitario
+    venda_item_db.tamanho = venda_item.tamanho
+    venda_item_db.genero = venda_item.genero
     
     db.commit()
     db.refresh(venda_item_db)
