@@ -334,7 +334,6 @@ function renderProductsTable(rows) {
     const searchable = [
       row.nome,
       row.descricao,
-      row.categoria,
       row.tamanho,
       row.genero,
     ].filter(Boolean).join(" ").toLowerCase();
@@ -345,8 +344,6 @@ function renderProductsTable(rows) {
     ? filtered.map((row) => `
       <tr>
         <td><strong>${row.nome}</strong><br><span class="muted">#${row.id}</span></td>
-        <td>${row.preco !== null && row.preco !== undefined ? money.format(row.preco) : "-"}</td>
-        <td>${row.categoria || row.descricao || "-"}</td>
         <td>${row.tamanho || "-"}</td>
         <td>${row.genero || "-"}</td>
         <td>${row.balance}</td>
@@ -358,7 +355,7 @@ function renderProductsTable(rows) {
         </td>
       </tr>
     `).join("")
-    : '<tr><td class="empty" colspan="7">Cadastre o primeiro produto.</td></tr>';
+    : '<tr><td class="empty" colspan="5">Cadastre o primeiro produto.</td></tr>';
 }
 
 function renderPurchasesTable() {
