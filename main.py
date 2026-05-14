@@ -25,7 +25,13 @@ bcrypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "*"
+        "controle-de-estoque-smoky.vercel.app",
+        "http://localhost",
+        "http://localhost:8000",
+        "http://localhost:8080",
+        "http://127.0.0.1:8000",
+        "http://127.0.0.1:8080",
+        "null",
     ],
     allow_credentials=True,
     allow_methods=["*"],

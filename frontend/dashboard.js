@@ -1,7 +1,7 @@
+const API_BASE = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+  ? "http://localhost:8000" 
+  : "https://controle-de-estoque-eyi8.onrender.com";
 
-const API_BASE = window.location.origin.startsWith("http")
-  ? window.location.origin
-  : "http://localhost:8000";
 
 
 (async () => {
