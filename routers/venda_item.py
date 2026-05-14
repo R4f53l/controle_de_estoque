@@ -1,7 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 from core.security import verificar_token
 from database import get_db
+from models.compra_produto import CompraProduto
 from models.venda import Venda
 from models.venda_item import VendaItem
 from schema.venda_item_schema import VendaComItem_Schema, VendaItem_Schema
@@ -20,39 +22,6 @@ def adicionar_venda_item(venda_item: VendaItem_Schema, db: Session = Depends(get
     db.commit()
     db.refresh(nova_venda_item)
     return {"message": "Produto adicionado à venda com sucesso", "venda_item": nova_venda_item}
-
-@router.post("/adicionar_com_itens")
-def adicionar_venda_com_itens(venda_com_itens: VendaComItem_Schema, db: Session = Depends(get_db)):
-    
-    if not venda_com_itens.itens:
-        raise HTTPException(status_code=400, detail="Adicione pelo menos um item na venda")
-
-    valor_venda = sum(item.quantidade * (item.valor_unitario or 0) for item in venda_com_itens.itens)
-
-    nova_venda = Venda(
-        vendaid = venda_com_itens.venda_id,
-        datadevenda = venda_com_itens.datadevenda,
-        valor = valor_venda
-    )
-
-    db.add(nova_venda)
-    db.flush()
-    itens = [
-        VendaItem(
-            venda_id=venda_com_itens.venda_id,
-            produto_id=item.produto_id,
-            quantidade=item.quantidade,
-            valor_unitario=item.valor_unitario
-        )
-        for item in venda_com_itens.itens
-    ]
-    db.add_all(itens)
-    db.commit()
-    return {
-        "message": "Itens adicionados à venda com sucesso",
-        "venda_id": venda_com_itens.venda_id,
-        "itens": itens
-    }
 
 
 @router.get("/listar_todos")

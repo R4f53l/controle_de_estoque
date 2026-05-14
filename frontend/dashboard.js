@@ -262,7 +262,7 @@ function stockRows() {
       .filter((item) => {
         if (Number(item.produto_id) !== Number(product.id)) return false;
         const sale = byId(state.sales, item.venda_id);
-        return sale && sale.venda_direta === false; // Only subtract if it came from stock
+        return sale && sale.venda_direta === false; 
       })
       .reduce((sum, item) => sum + Number(item.quantidade || 0), 0);
 
