@@ -238,6 +238,10 @@ button {
   align-items: start;
 }
 
+.overview-grid {
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 320px);
+}
+
 .panel {
   min-width: 0;
   padding: 18px;
@@ -253,6 +257,14 @@ button {
 
 #overview .panel.wide {
   grid-column: span 1;
+}
+
+#products .content-grid {
+  grid-template-columns: minmax(260px, 320px) minmax(0, 1fr);
+}
+
+#products .panel.wide table {
+  min-width: 920px;
 }
 
 .panel-heading {
@@ -515,7 +527,9 @@ textarea {
 
   .nav,
   .metrics-grid,
-  .content-grid {
+  .content-grid,
+  .overview-grid,
+  #products .content-grid {
     grid-template-columns: 1fr;
   }
 

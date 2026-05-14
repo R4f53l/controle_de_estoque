@@ -70,6 +70,8 @@ const els = {
   get productId() { return document.querySelector("#product-id"); },
   get productName() { return document.querySelector("#product-name"); },
   get productDescription() { return document.querySelector("#product-description"); },
+  get productSize() { return document.querySelector("#product-size"); },
+  get productGender() { return document.querySelector("#product-gender"); },
   get productFormTitle() { return document.querySelector("#product-form-title"); },
   get cancelProductEdit() { return document.querySelector("#cancel-product-edit"); },
   get purchaseForm() { return document.querySelector("#purchase-form"); },
@@ -328,14 +330,25 @@ function renderStockTable(rows) {
 
 function renderProductsTable(rows) {
   const query = els.productSearch.value.trim().toLowerCase();
-  const filtered = rows.filter((row) => row.nome.toLowerCase().includes(query));
+  const filtered = rows.filter((row) => {
+    const searchable = [
+      row.nome,
+      row.descricao,
+      row.categoria,
+      row.tamanho,
+      row.genero,
+    ].filter(Boolean).join(" ").toLowerCase();
+    return searchable.includes(query);
+  });
 
   els.productsTable.innerHTML = filtered.length
     ? filtered.map((row) => `
       <tr>
-        <td>#${row.id}</td>
-        <td><strong>${row.nome}</strong></td>
-        <td>${row.descricao || "-"}</td>
+        <td><strong>${row.nome}</strong><br><span class="muted">#${row.id}</span></td>
+        <td>${row.preco !== null && row.preco !== undefined ? money.format(row.preco) : "-"}</td>
+        <td>${row.categoria || row.descricao || "-"}</td>
+        <td>${row.tamanho || "-"}</td>
+        <td>${row.genero || "-"}</td>
         <td>${row.balance}</td>
         <td>
           <div class="actions">
@@ -345,7 +358,7 @@ function renderProductsTable(rows) {
         </td>
       </tr>
     `).join("")
-    : '<tr><td class="empty" colspan="5">Cadastre o primeiro produto.</td></tr>';
+    : '<tr><td class="empty" colspan="7">Cadastre o primeiro produto.</td></tr>';
 }
 
 function renderPurchasesTable() {
@@ -498,6 +511,8 @@ async function saveProduct(event) {
   const payload = {
     nome: els.productName.value.trim(),
     descricao: els.productDescription.value.trim() || null,
+    tamanho: els.productSize.value || null,
+    genero: els.productGender.value || null,
   };
 
   await request(id ? endpoints.productUpdate(id) : endpoints.productCreate, {
@@ -515,6 +530,8 @@ function editProduct(id) {
   els.productId.value = product.id;
   els.productName.value = product.nome;
   els.productDescription.value = product.descricao || "";
+  els.productSize.value = product.tamanho || "";
+  els.productGender.value = product.genero || "";
   els.productFormTitle.textContent = "Editar produto";
   els.cancelProductEdit.classList.remove("hidden");
   switchSection("products");

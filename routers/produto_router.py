@@ -15,7 +15,9 @@ def adicionar_produto(produto: Produto_Schema, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Produto já existe")
     novo_produto = Produto(
         nome=produto.nome,
-        descricao=produto.descricao
+        descricao=produto.descricao,
+        tamanho=produto.tamanho,
+        genero=produto.genero
     )
     db.add(novo_produto)
     db.commit()
@@ -38,6 +40,8 @@ def atualizar_produto(produto_id: int, produto: Produto_Schema, db: Session = De
         raise HTTPException(status_code=404, detail="Produto não encontrado")
     produto_existente.nome = produto.nome
     produto_existente.descricao = produto.descricao
+    produto_existente.tamanho = produto.tamanho
+    produto_existente.genero = produto.genero
     db.commit()
     db.refresh(produto_existente)
     return {"message": "Produto atualizado com sucesso", "produto_id": produto_existente.id}

@@ -62,7 +62,7 @@
           </article>
         </div>
 
-        <div class="content-grid">
+        <div class="content-grid overview-grid">
           <section class="panel wide">
             <div class="panel-heading">
               <div>
@@ -117,6 +117,27 @@
               Descricao
               <textarea id="product-description" name="descricao" rows="4"></textarea>
             </label>
+            <label>
+              Tamanho
+              <select id="product-size" name="tamanho">
+                <option value="">Selecione</option>
+                <option value="PP">PP</option>
+                <option value="P">P</option>
+                <option value="M">M</option>
+                <option value="G">G</option>
+                <option value="GG">GG</option>
+                <option value="XG">XG</option>
+              </select>
+            </label>
+            <label>
+              Genero
+              <select id="product-gender" name="genero">
+                <option value="">Selecione</option>
+                <option value="Masculino">Masculino</option>
+                <option value="Feminino">Feminino</option>
+                <option value="Unissex">Unissex</option>
+              </select>
+            </label>
             <div class="form-actions">
               <button class="primary" type="submit">Salvar produto</button>
               <button id="cancel-product-edit" class="secondary hidden" type="button">Cancelar</button>
@@ -135,9 +156,11 @@
               <table>
                 <thead>
                   <tr>
-                    <th>ID</th>
                     <th>Nome</th>
-                    <th>Descricao</th>
+                    <th>Preco</th>
+                    <th>Categoria</th>
+                    <th>Tamanho</th>
+                    <th>Genero</th>
                     <th>Estoque</th>
                     <th>Acoes</th>
                   </tr>
