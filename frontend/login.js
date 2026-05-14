@@ -42,7 +42,7 @@ async function login(event) {
       els.messageDiv.classList.remove("text-danger");
       els.messageDiv.classList.add("text-success");
       els.messageDiv.textContent = "Sucesso! Redirecionando...";
-      window.location.href = API_BASE;
+      window.location.href = "dashboard.html";
       return;
     }
     else {
